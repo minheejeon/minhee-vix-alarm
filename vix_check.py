@@ -1,9 +1,10 @@
+import os
 import yfinance as yf
 import requests
 
-# 1. 민희의 고유 정보 설정
-TOKEN = "8273447953:AAHeFjOFMRItCviCYAuBcrmUiVuXt3M3Vak"
-CHAT_ID = "8442620600"
+# GitHub Secrets에서 정보 가져오기
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_investment_advice():
     # 데이터 가져오기 (VIX: 공포지수, QQQ: 나스닥100 ETF)
@@ -36,4 +37,5 @@ def get_investment_advice():
 
 # 실행
 if __name__ == "__main__":
+
     get_investment_advice()
