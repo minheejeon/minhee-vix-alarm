@@ -2,43 +2,30 @@ import os
 import yfinance as yf
 import requests
 
-# GitHub Secrets에서 정보 가져오기
+# 1. 정보를 가져오고 출력해보기 (로그 확인용)
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def get_investment_advice():
-    # 데이터 가져오기 (VIX: 공포지수, QQQ: 나스닥100 ETF)
+    # 토큰이 비어있는지 체크
+    if not TOKEN or not CHAT_ID:
+        print(f"❌ 에러: Secrets를 불러오지 못했습니다. TOKEN 존재여부: {bool(TOKEN)}, ID 존재여부: {bool(CHAT_ID)}")
+        return
+
     vix = yf.Ticker("^VIX").history(period="1d")['Close'].iloc[-1]
     qqq = yf.Ticker("QQQ").history(period="1d")['Close'].iloc[-1]
     
-    # 지수 상태 판단 로직
-    if vix >= 30:
-        status = "😱 역대급 공포 구간 (매수 기회!)"
-        advice = "시장이 패닉이야. 적립식 금액보다 조금 더 과감하게 사보는 건 어때?"
-    elif vix >= 20:
-        status = "😰 불안한 변동성 구간"
-        advice = "시장이 출렁거려. 욕심부리지 말고 정해진 금액만 차분히 사자."
-    else:
-        status = "😊 평온한 상승 구간"
-        advice = "다들 낙관적이야. 무리하게 추격 매수하지 말고 원래 계획대로만 해!"
+    status = "😱 역대급 공포" if vix >= 30 else "😰 불안한 변동성" if vix >= 20 else "😊 평온한 상승"
+    advice = "과감하게 매수!" if vix >= 30 else "정해진 금액만 사자." if vix >= 20 else "무리하지 말기!"
 
-    # 메시지 구성
-    message = (
-        f"🔔 민희의 모닝 투자 알람\n\n"
-        f"📊 나스닥(QQQ): ${qqq:.2f}\n"
-        f"📉 공포지수(VIX): {vix:.2f}\n\n"
-        f"🚩 현재 상태: {status}\n"
-        f"💡 조언: {advice}"
-    )
+    message = f"🔔 민희의 투자 알람\n\n📊 나스닥: ${qqq:.2f}\n📉 공포지수: {vix:.2f}\n\n🚩 {status}\n💡 {advice}"
     
-    # 텔레그램으로 전송
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={message}"
-    response = requests.get(url)
+    # f-string 안에서 bot 글자 뒤에 토큰이 바로 붙는지 확인
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {'chat_id': CHAT_ID, 'text': message}
+    
+    response = requests.get(url, params=params)
+    print(f"✅ 전송 시도! 결과 코드: {response.status_code}")
 
-    # 이 부분을 추가해서 로그를 확인해봐!
-    print(f"전송 결과 코드: {response.status_code}")
-    print(f"응답 내용: {response.text}")
-
-# 실행
 if __name__ == "__main__":
     get_investment_advice()
