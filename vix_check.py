@@ -33,9 +33,12 @@ def get_investment_advice():
     
     # 텔레그램으로 전송
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={message}"
-    requests.get(url)
+    response = requests.get(url)
+
+    # 이 부분을 추가해서 로그를 확인해봐!
+    print(f"전송 결과 코드: {response.status_code}")
+    print(f"응답 내용: {response.text}")
 
 # 실행
 if __name__ == "__main__":
-
     get_investment_advice()
