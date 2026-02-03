@@ -1,0 +1,27 @@
+name: Minhee VIX Alarm
+
+on:
+  schedule:
+    # UTC 기준이라 한국 시간(KST)에서 9시간을 빼야 해!
+    # 09시(00:00), 13시(04:00), 17시(08:00), 21시(12:00), 24시(15:00)
+    - cron: '0 0,4,8,12,15 * * *'
+  workflow_dispatch: # 수동으로 실행해보고 싶을 때 사용
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install yfinance requests
+
+      - name: Run script
+        run: python vix_check.py
